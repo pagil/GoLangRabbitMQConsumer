@@ -20,14 +20,20 @@ func failOnError(err error, msg string)  {
   }
 }
 
-func sendEmail(email string) {
-  log.Printf("Sending email to: %s", email)
+func sendEmail(u user_struct) {
+  log.Printf("Sending email to: %s", u.Email)
 
 
   from := mail.Address{"Pit-Stop", "go.lang.demo.cs@gmail.com"}
-  to := mail.Address{"Customer", email}
+  to := mail.Address{"Customer", u.Email}
   title := "Car Reports"
-  body := "Done, mate! Now you have Pit-Stop in the From :)"
+  body := "Dear " + u.FirstName + ",\r\n\r\n" +
+  "Please, find documents for your purchase below:\r\n" +
+  "Certificate of Roadworthiness: http://10.1.58.23:8000/rwc?refKey=1234567890\r\n" +
+  "Carfacts report: http://10.1.58.23:8000/carfacts?refKey=1234567890\r\n" +
+  "Transfer Registration Form: http://10.1.58.23:8000/transfer?refKey=1234567890\r\n\r\n" +
+  "With best regards,\r\n" +
+  "Pit-Stop Team."
 
   header := make(map[string]string)
   header["From"] = from.String()
@@ -62,7 +68,7 @@ func sendEmail(email string) {
   )
   failOnError(err, "Failed to connect to email server")
 
-  log.Printf("Sent email to: %s", email)
+  log.Printf("Sent email to: %s", u.Email)
 }
 
 func encodeRFC2047(String string) string{
@@ -111,7 +117,7 @@ func main() {
         err = json.Unmarshal([]byte(d.Body), &u)
         failOnError(err, "Failed to unmarshal message from the queue")
 
-        sendEmail(u.Email)
+        sendEmail(u)
     }
   }()
 
